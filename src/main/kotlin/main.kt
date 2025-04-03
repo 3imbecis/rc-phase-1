@@ -365,3 +365,60 @@ fun fetch(url: URL){
     }
 
 }
+
+fun codeDecoder(array: List<String>){
+
+    var code = ""
+
+    for(i in array.indices){
+        code = array[0]
+    }
+
+    val codeInt = code.split(" ")[1].toInt()
+
+    val method100 = listOf(
+        "Your code was $codeInt",
+        "This type of response indicates that the request",
+        "was received and understood",
+        "The 100 codes goes from 100 to 104",
+        ).joinToString("\r\n") + "\r\n"
+
+    val method200 = listOf(
+        "Your code was $codeInt",
+        "This class of status codes indicates the action requested by the",
+        "client was received, understood, and accepted",
+        "The 200 codes goes from 200 to 226",
+    ).joinToString("\r\n") + "\r\n"
+
+    val method300 = listOf(
+        "Your code was $codeInt",
+        "This class of status code indicates the client must take additional",
+        "action to complete the request",
+        "Many of these status codes are used in URL redirection",
+        "The 300 codes goes from 300 to 308",
+    ).joinToString("\r\n") + "\r\n"
+
+    val method400 = listOf(
+        "Your code was $codeInt",
+        "This class of status code is intended for situations in which the",
+        "error seems to have been caused by the client",
+        "These status codes are applicable to any request method",
+        "The 400 codes goes from 400 to 451",
+    ).joinToString("\r\n") + "\r\n"
+
+    val method500 = listOf(
+        "Your code was $codeInt",
+        "The 500 codes indicates that it has encountered an error or is",
+        "otherwise incapable of performing the request",
+        "The 500 codes goes from 500 to 511",
+    ).joinToString("\r\n") + "\r\n"
+
+    when(codeInt){
+        in 100 .. 200 -> prettyPrint("100 Code Description",method100)
+        in 200 .. 300 -> prettyPrint("200 Code Description",method200)
+        in 300 .. 400 -> prettyPrint("300 Code Description",method300)
+        in 400 .. 500 -> prettyPrint("400 Code Description",method400)
+        in 500 .. 600 -> prettyPrint("500 Code Description",method500)
+    }
+
+}
