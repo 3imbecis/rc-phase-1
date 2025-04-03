@@ -1,6 +1,7 @@
 import java.io.IOException
 import java.net.Socket
 import java.util.Scanner
+import kotlin.math.min
 
 const val RED = "\u001b[31m"
 const val GREEN = "\u001b[92m"
@@ -29,7 +30,6 @@ fun main(){
         try{
             client = Socket(url.host, url.port)
             println(" ${GREEN}Connected!${RESET}")
-            println()
         }catch(e: IOException){
             println(" ${RED}Failed to connect! ${GRAY}${e.message}${RESET}")
             continue;
@@ -39,7 +39,7 @@ fun main(){
 
         // Send HTTP request
 
-        println(" Sending HTTP request...")
+        println("\n Sending HTTP request...\n")
         val request = listOf(
             "GET /${url.path} HTTP/1.1",
             "Host: ${url.host}",
@@ -48,13 +48,13 @@ fun main(){
             "Connection: close",
             ""
         ).joinToString("\r\n") + "\r\n"
-        printMessage("HTTP Request", request);
+        prettyPrint("HTTP Request", request);
 
         client.getOutputStream().write(request.toByteArray())
 
         // Receive HTTP response headers
 
-        println(" Waiting for the HTTP response headers...")
+        println("\n Waiting for the HTTP response headers...\n")
 
         var responseHeaders = mutableListOf<String>()
         do{
@@ -64,7 +64,9 @@ fun main(){
 
         }while(responseHeaders.last() != "")
 
-        printMessage("HTTP Response Headers", responseHeaders.joinToString("\n"))
+        prettyPrint("HTTP Response Headers", responseHeaders.joinToString("\n"))
+
+
 
         // TODO: Handle headers and if 200 or wtv, recieve content
     }
@@ -111,25 +113,35 @@ fun requestUrl(): URL {
     return URL(hostname, port, path)
 }
 
-fun printMessage(title: String, message: String){
+const val MAX_WIDTH = 70
+
+fun prettyPrint(title: String, message: String){
 
     val lines = message
         .trim()
         .replace("\r", "")
         .split('\n')
-    val width = lines.maxOfOrNull { it.length } ?: 0
+    val width = (lines.maxOfOrNull { it.length } ?: 0).coerceIn((title.length + 2)..MAX_WIDTH)
 
-    println()
     println("${BLUE}┌─${RESET + BLUE_BG} $title ${RESET + BLUE + "─".repeat(width - title.length - 2)}─┐${RESET}")
     println("${BLUE}│ ${" ".repeat(width)} │${RESET}")
     for(line in lines){
         print("${BLUE}│${RESET} ")
-        print(line)
-        print(" ".repeat(width - line.length))
+        print(if(line.length < 100) line else "${line.substring(0..<(MAX_WIDTH - 3))}$GRAY...$RESET")
+        print(" ".repeat(width - min(line.length, MAX_WIDTH)))
         println(" ${BLUE}│${RESET}")
     }
     println("${BLUE}│ ${" ".repeat(width)} │${RESET}")
     println("${BLUE}└─${"─".repeat(width)}─┘${RESET}")
-    println()
+
+}
+
+fun parseHeaders(lines: List<String>){
+
+    if(lines.isEmpty()){
+        println(" ${RED}Invalid response: No headers were sent!${RESET}")
+    }
+
+    // TODO: finish this
 
 }
