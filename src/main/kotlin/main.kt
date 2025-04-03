@@ -2,14 +2,25 @@ import java.io.IOException
 import java.net.Socket
 import java.util.Scanner
 
+const val RED = "\u001b[31m"
+const val GREEN = "\u001b[92m"
+const val GRAY = "\u001b[90m"
+const val BLUE = "\u001b[94m"
+const val YELLOW = "\u001b[33m"
+const val BLUE_BG = "\u001b[104m\u001b[97m"
+const val RESET = "\u001b[0m"
+
 fun main(){
 
     println()
-    println(" ----- TERMINAL WEB CLIENT ----- ")
+    println(" ${GRAY}----- ${BLUE}TERMINAL WEB CLIENT ${GRAY}-----${RESET} ")
 
     while(true){
 
+        // Ask for a URL
         val url = requestUrl()
+
+        // Connect to the server
 
         println()
         println(" Connecting to ${if(url.port == 80) url.host else "${url.host}:${url.port}"}...")
@@ -17,12 +28,16 @@ fun main(){
         var client: Socket
         try{
             client = Socket(url.host, url.port)
-            println(" Connected!")
+            println(" ${GREEN}Connected!${RESET}")
             println()
         }catch(e: IOException){
-            println(" Failed to connect: ${e.message}")
+            println(" ${RED}Failed to connect! ${GRAY}${e.message}${RESET}")
             continue;
         }
+
+        val scanner = Scanner(client.getInputStream())
+
+        // Send HTTP request
 
         println(" Sending HTTP request...")
         val request = listOf(
@@ -36,24 +51,22 @@ fun main(){
         printMessage("HTTP Request", request);
 
         client.getOutputStream().write(request.toByteArray())
-        // print
 
-        println(" Waiting for the HTTP response...")
+        // Receive HTTP response headers
 
-        val scanner = Scanner(client.getInputStream())
+        println(" Waiting for the HTTP response headers...")
 
-        var response = mutableListOf<String>()
-
+        var responseHeaders = mutableListOf<String>()
         do{
 
             if(scanner.hasNextLine())
-                response.add(scanner.nextLine())
+                responseHeaders.add(scanner.nextLine())
 
-        }while(response.last() != "")
-        printMessage("HTTP Response", response.joinToString("\n"))
+        }while(responseHeaders.last() != "")
 
-        println(" Done response!")
+        printMessage("HTTP Response Headers", responseHeaders.joinToString("\n"))
 
+        // TODO: Handle headers and if 200 or wtv, recieve content
     }
 
 }
@@ -63,18 +76,18 @@ data class URL(val host: String, val port: Int, val path: String)
 fun requestUrl(): URL {
 
     println()
-    print(" URL: http://")
+    print(" ${BLUE}URL:${RESET} http://")
     val url = readln().trim()
 
     if(url.isEmpty()){
-        println(" A URL is required!")
+        println(" ${YELLOW}A URL is required!${RESET}")
         return requestUrl()
     }
 
     val urlParts = url.split('/', limit = 2)
     val host = urlParts[0]
     if(host.isEmpty()){
-        println(" The host is required!")
+        println(" ${YELLOW}The host is required!${RESET}")
         return requestUrl()
     }
     val path = if(urlParts.size > 1) urlParts[1] else ""
@@ -82,16 +95,16 @@ fun requestUrl(): URL {
     val hostParts = host.split(':', limit = 2)
     val hostname = hostParts[0];
     if(hostname.isEmpty()){
-        println(" The host name is required!")
+        println(" ${YELLOW}The host name is required!${RESET}")
         return requestUrl()
     }
     val port = (if(hostParts.size > 1) hostParts[1] else "80").toIntOrNull()
     if(port == null){
-        println(" Failed to parse the port number!")
+        println(" ${YELLOW}Failed to parse the port number!${RESET}")
         return requestUrl()
     }
     if(port !in 0..65535){
-        println(" The port must be between 0 and 65535! (inclusive)");
+        println(" ${YELLOW}The port must be between 0 and 65535! (inclusive)${RESET}");
         return requestUrl()
     }
 
@@ -107,13 +120,16 @@ fun printMessage(title: String, message: String){
     val width = lines.maxOfOrNull { it.length } ?: 0
 
     println()
-    println("┌─[ $title ]${"─".repeat(width - title.length - 4)}─┐")
-    println("│ ${" ".repeat(width)} │")
+    println("${BLUE}┌─${RESET + BLUE_BG} $title ${RESET + BLUE + "─".repeat(width - title.length - 2)}─┐${RESET}")
+    println("${BLUE}│ ${" ".repeat(width)} │${RESET}")
     for(line in lines){
-        println("│ ${line}${" ".repeat(width - line.length)} │")
+        print("${BLUE}│${RESET} ")
+        print(line)
+        print(" ".repeat(width - line.length))
+        println(" ${BLUE}│${RESET}")
     }
-    println("│ ${" ".repeat(width)} │")
-    println("└─${"─".repeat(width)}─┘")
+    println("${BLUE}│ ${" ".repeat(width)} │${RESET}")
+    println("${BLUE}└─${"─".repeat(width)}─┘${RESET}")
     println()
 
 }
