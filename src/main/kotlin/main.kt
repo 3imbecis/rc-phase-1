@@ -102,7 +102,7 @@ fun parseURL(url: String, printError: Boolean = true): URL? {
     // Split hostname and port
 
     val hostParts = host.split(':', limit = 2)
-    val hostname = hostParts[0];
+    val hostname = hostParts[0]
     if(hostname.isEmpty()){
         if(printError) println(" ${YELLOW}The host name is required!${RESET}")
         return null
@@ -113,7 +113,7 @@ fun parseURL(url: String, printError: Boolean = true): URL? {
         return null
     }
     if(port !in 0..65535){
-        if(printError) println(" ${YELLOW}The port must be between 0 and 65535! (inclusive)${RESET}");
+        if(printError) println(" ${YELLOW}The port must be between 0 and 65535! (inclusive)${RESET}")
         return null
     }
 
@@ -349,7 +349,7 @@ fun fetch(url: URL){
         while(scanner.hasNextLine()){
 
             val chunkSize = scanner.nextLine().toIntOrNull(16) ?: 0
-            if(chunkSize == 0) break;
+            if(chunkSize == 0) break
 
             repeat(chunkSize){
                 if(scanner.hasNextLine())
